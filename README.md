@@ -116,7 +116,7 @@ truncated. Raw bytes appear only in `Unknown` variants, where they are preserved
 because the type is not understood.
 
 **Warnings without data loss.** Anomalous values (bad checksum, reserved field,
-out-of-spec value) produce a warning, not an error. On decode the warning is attached to
+out-of-range value) produce a warning, not an error. On decode the warning is attached to
 the returned frame; on encode it is attached to the returned `Decoded`. The caller
 receives the data and the warning; nothing is silently discarded. Truncation is the
 only hard error.
@@ -171,19 +171,23 @@ identical across build tiers.
 ## Stack position
 
 cartouche is the InfoFrame encoding layer. concordance produces the negotiated
-configuration that cartouche encodes; the integration layer transmits and receives the
-resulting packets.
+configuration; a planned crate will turn it into InfoFrames (and validate frames against
+it), which cartouche encodes; the integration layer transmits and receives the resulting
+packets.
 
 ```mermaid
 flowchart LR
     piaf["piaf\n(EDID parser)"]
     conc["concordance\n(mode negotiation)"]
     cart["cartouche\n(InfoFrame encode/decode)"]
+    build["config → InfoFrames\n(planned)"]
     integ["integration layer"]
 
     piaf -->|"DisplayCapabilities"| conc
     conc -->|"NegotiatedConfig"| integ
     integ -->|"constructs InfoFrames"| cart
+    integ -.->|"configuration"| build
+    build -.->|"InfoFrames"| cart
     cart -->|"[u8; 31] packets"| integ
 ```
 

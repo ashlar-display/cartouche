@@ -11,13 +11,13 @@ use crate::warn::HdmiForumVsiWarning;
 /// Byte order as it appears on the wire: PB1 = 0xD8, PB2 = 0x5D, PB3 = 0xC4.
 pub(crate) const HDMI_FORUM_OUI: [u8; 3] = [0xD8, 0x5D, 0xC4];
 
-/// An HDMI Forum Vendor-Specific InfoFrame (HDMI 2.1 §10.2.5, type code 0x81).
+/// An HDMI Forum Vendor-Specific InfoFrame (HDMI 2.1, type code 0x81).
 ///
 /// Carries HDMI 2.1 auxiliary signaling: ALLM, VRR, DSC, QMS, and FRL rate.
 /// Identified on the wire by the HDMI Forum OUI (0xD8, 0x5D, 0xC4) in
 /// PB1–PB3.
 ///
-/// # Bit layout reference (HDMI 2.1 §10.2.5)
+/// # Bit layout reference (HDMI 2.1)
 ///
 /// - PB4: `allm`\[7\], `frl_rate`\[6:4\], `fapa_start_location`\[3\], `fva`\[2\]
 /// - PB5: `vrr_en`\[7\], `m_const`\[6\], `qms_en`\[5\], `neg_mvrr`\[4\], `m_vrr`\[11:8\] in \[3:0\]

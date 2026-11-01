@@ -74,7 +74,7 @@ for packet in encoded.value {
 
 ## `DynamicHdrInfoFrame` variants
 
-| Variant              | Format ID | Specification           |
+| Variant              | Format ID | Standard                |
 |----------------------|-----------|-------------------------|
 | `Hdr10Plus(meta)`    | `0x04`    | ETSI TS 103 433-1 §6.1  |
 | `SlHdr(meta)`        | `0x02`    | ETSI TS 103 433-1 §A.1  |

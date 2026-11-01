@@ -67,7 +67,7 @@ fn reserved_bit_warning() {
 #[test]
 fn unknown_lfe_playback_level_warns_and_falls_back() {
     let mut packet = default_frame().into_packets().value.next().unwrap();
-    // LSV occupies PB5 bits [6:3]; set value 0x0F (15) which is out of spec.
+    // LSV occupies PB5 bits [6:3]; set value 0x0F (15) which is out of range.
     packet[8] = (packet[8] & 0x87) | (0x0F << 3);
     let sum: u8 = packet.iter().fold(0u8, |a, &b| a.wrapping_add(b));
     packet[3] = packet[3].wrapping_sub(sum);

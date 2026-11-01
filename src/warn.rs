@@ -28,7 +28,7 @@ pub enum AviWarning {
         /// Zero-indexed bit position within the byte.
         bit: u8,
     },
-    /// A field contained a value not defined in the specification.
+    /// A field contained a value the standard does not define.
     ///
     /// `field` names the field (e.g. `"colorimetry"`); `raw` is the raw byte
     /// value that was not recognised.
@@ -62,7 +62,7 @@ pub enum AudioWarning {
         /// Zero-indexed bit position within the byte.
         bit: u8,
     },
-    /// A field contained a value not defined in the specification.
+    /// A field contained a value the standard does not define.
     UnknownEnumValue {
         /// Name of the field that contained the unrecognised value.
         field: &'static str,
@@ -93,7 +93,7 @@ pub enum HdrStaticWarning {
         /// Zero-indexed bit position within the byte.
         bit: u8,
     },
-    /// A field contained a value not defined in the specification.
+    /// A field contained a value the standard does not define.
     UnknownEnumValue {
         /// Name of the field that contained the unrecognised value.
         field: &'static str,
@@ -124,7 +124,7 @@ pub enum HdmiForumVsiWarning {
         /// Zero-indexed bit position within the byte.
         bit: u8,
     },
-    /// A field contained a value not defined in the specification.
+    /// A field contained a value the standard does not define.
     UnknownEnumValue {
         /// Name of the field that contained the unrecognised value.
         field: &'static str,
@@ -154,7 +154,7 @@ pub enum DynamicHdrWarning {
         /// Zero-indexed bit position within the byte.
         bit: u8,
     },
-    /// A field contained a value not defined in the specification.
+    /// A field contained a value the standard does not define.
     UnknownEnumValue {
         /// Name of the field that contained the unrecognised value.
         field: &'static str,
