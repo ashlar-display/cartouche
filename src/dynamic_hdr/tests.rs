@@ -799,7 +799,7 @@ fn hdr10plus_four_windows_is_malformed() {
 #[test]
 #[cfg(any(feature = "alloc", feature = "std"))]
 fn hdr10plus_unknown_application_mode_warning() {
-    // application_mode=2 is unknown (spec defines 0 and 1 only).
+    // application_mode=2 is unknown (only 0 and 1 are defined).
     // Decode must succeed and emit UnknownEnumValue; no scene_frame_switching_flag
     // bit is consumed (same as mode 0).
     let (mut payload, _) = make_minimal_hdr10plus_payload();

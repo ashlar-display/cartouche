@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.2] - 2026-11-02
+
+## [0.3.1] - 2026-11-02
+
+### Changed
+
+- **`display-types` requirement widened to `>=0.4.3, <0.6`**, so both 0.4.3 and 0.5 are
+  accepted, as in hdmi-hal. The display-types items cartouche uses are the same in both, so this
+  is not a breaking change: an existing dependency on display-types 0.4 keeps resolving, and
+  one on 0.5 now lines up with cartouche's.
+- **Part of Ashlar** — the README now opens with a block naming the
+  [Ashlar](https://ashlar-display.org) stack and linking the other crates in it. Keywords
+  are aligned across the stack, with `ashlar` and `hdmi` on every crate; `ashlar` and `hdr`
+  are added, `display` and `hardware` are dropped. Categories: `parser-implementations` is
+  replaced by `no-std` and `no-std::no-alloc` (`encoding` already covers both directions).
+  The crate's `homepage` is now the Ashlar website.
+
+- `doc/roadmap.md` drops its "Shipped" section, a stale copy of what this changelog
+  records; the roadmap lists only what is planned.
+- **Moved to the `ashlar-display` organization** — the repository is now
+  `ashlar-display/cartouche` (the old URLs redirect), and `repository` points there.
+  Releases are attested and published from the new repository; 0.2.0 and 0.3.0, attested
+  before the move, verify with `--owner DracoWhitefire --signer-repo
+  DracoWhitefire/cartouche` (see "Verifying releases" in the README). The code of conduct
+  is now the organization's, shared by every Ashlar repository; the repository's own copy
+  is removed.
+
 ## [0.3.0] - 2026-10-18
 
 ### Changed

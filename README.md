@@ -1,12 +1,24 @@
 # cartouche
 
-[![CI](https://github.com/DracoWhitefire/cartouche/actions/workflows/ci.yml/badge.svg)](https://github.com/DracoWhitefire/cartouche/actions/workflows/ci.yml)
+[![CI](https://github.com/ashlar-display/cartouche/actions/workflows/ci.yml/badge.svg)](https://github.com/ashlar-display/cartouche/actions/workflows/ci.yml)
 [![crates.io](https://img.shields.io/crates/v/cartouche.svg)](https://crates.io/crates/cartouche)
 [![docs.rs](https://docs.rs/cartouche/badge.svg)](https://docs.rs/cartouche)
-[![License: MPL-2.0](https://img.shields.io/badge/license-MPL--2.0-blue.svg)](https://github.com/DracoWhitefire/cartouche/blob/main/LICENSE)
+[![License: MPL-2.0](https://img.shields.io/badge/license-MPL--2.0-blue.svg)](https://github.com/ashlar-display/cartouche/blob/main/LICENSE)
 [![Rust 1.85+](https://img.shields.io/badge/rustc-1.85+-orange.svg)](https://blog.rust-lang.org/2025/02/20/Rust-1.85.0.html)
 [![SLSA Level 2](https://slsa.dev/images/gh-badge-level2.svg)](https://slsa.dev)
 [![trusted publishing only](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fcrates.io%2Fapi%2Fv1%2Fcrates%2Fcartouche&query=%24.crate.trustpub_only&label=trusted%20publishing%20only)](#verifying-releases)
+
+> **Part of [Ashlar](https://ashlar-display.org)** — a display connection stack in Rust,
+> HDMI 2.1 first: from EDID parsing through mode negotiation to FRL link training.
+>
+> [display-types](https://github.com/ashlar-display/display-types) ·
+> [piaf](https://github.com/ashlar-display/piaf) ·
+> [concordance](https://github.com/ashlar-display/concordance) ·
+> **cartouche** ·
+> [culvert](https://github.com/ashlar-display/culvert) ·
+> [plumbob](https://github.com/ashlar-display/plumbob) ·
+> [hdmi-hal](https://github.com/ashlar-display/hdmi-hal) ·
+> [hdmi-hal-i2c-dev](https://github.com/ashlar-display/hdmi-hal-i2c-dev)
 
 Encoding and decoding for HDMI InfoFrames.
 
@@ -104,7 +116,7 @@ truncated. Raw bytes appear only in `Unknown` variants, where they are preserved
 because the type is not understood.
 
 **Warnings without data loss.** Anomalous values (bad checksum, reserved field,
-out-of-spec value) produce a warning, not an error. On decode the warning is attached to
+out-of-range value) produce a warning, not an error. On decode the warning is attached to
 the returned frame; on encode it is attached to the returned `Decoded`. The caller
 receives the data and the warning; nothing is silently discarded. Truncation is the
 only hard error.
@@ -159,19 +171,23 @@ identical across build tiers.
 ## Stack position
 
 cartouche is the InfoFrame encoding layer. concordance produces the negotiated
-configuration that cartouche encodes; the integration layer transmits and receives the
-resulting packets.
+configuration; a planned crate will turn it into InfoFrames (and validate frames against
+it), which cartouche encodes; the integration layer transmits and receives the resulting
+packets.
 
 ```mermaid
 flowchart LR
     piaf["piaf\n(EDID parser)"]
     conc["concordance\n(mode negotiation)"]
     cart["cartouche\n(InfoFrame encode/decode)"]
+    build["config → InfoFrames\n(planned)"]
     integ["integration layer"]
 
     piaf -->|"DisplayCapabilities"| conc
     conc -->|"NegotiatedConfig"| integ
     integ -->|"constructs InfoFrames"| cart
+    integ -.->|"configuration"| build
+    build -.->|"InfoFrames"| cart
     cart -->|"[u8; 31] packets"| integ
 ```
 
@@ -183,11 +199,19 @@ Releases from v0.2.0 onwards are built on GitHub Actions and attested with
 [GitHub CLI](https://cli.github.com/) and run:
 
 ```sh
-gh attestation verify cartouche-X.Y.Z.crate --repo DracoWhitefire/cartouche
+gh attestation verify cartouche-X.Y.Z.crate --repo ashlar-display/cartouche
+```
+
+Releases from before the repository moved to the `ashlar-display` organization (0.2.0 and
+0.3.0) were attested under its previous owner, and verify against it:
+
+```sh
+gh attestation verify cartouche-X.Y.Z.crate --owner DracoWhitefire \
+  --signer-repo DracoWhitefire/cartouche
 ```
 
 The attested `.crate` is attached to each
-[GitHub release](https://github.com/DracoWhitefire/cartouche/releases).
+[GitHub release](https://github.com/ashlar-display/cartouche/releases).
 
 Releases after 0.2.0 are also uploaded through crates.io
 [trusted publishing](https://rust-lang.github.io/rfcs/3691-trusted-publishing-cratesio.html): the publish
