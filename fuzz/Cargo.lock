@@ -16,7 +16,7 @@ checksum = "843867be96c8daad0d758b57df9392b6d8d271134fce549de6ce169ff98a92af"
 
 [[package]]
 name = "cartouche"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "display-types",
 ]
@@ -49,9 +49,9 @@ checksum = "9330f8b2ff13f34540b44e946ef35111825727b38d33286ef986142615121801"
 
 [[package]]
 name = "display-types"
-version = "0.4.2"
+version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d55798f52f556c3d0a8345ac33d44420bcadea3a2b93154248458f384fdddd78"
+checksum = "c2a14d4076790bab27f37a48c0e8fb29993ec8254effcb930b9dab9df29040e2"
 dependencies = [
  "bitflags",
 ]
