@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **`display-types` requirement widened to `>=0.4.3, <0.6`**, so both 0.4.3 and 0.5 are
+  accepted, as in hdmi-hal. The display-types items cartouche uses are the same in both, so this
+  is not a breaking change: an existing dependency on display-types 0.4 keeps resolving, and
+  one on 0.5 now lines up with cartouche's.
 - **Part of Ashlar** — the README now opens with a block naming the
   [Ashlar](https://ashlar-display.org) stack and linking the other crates in it. Keywords
   are aligned across the stack, with `ashlar` and `hdmi` on every crate; `ashlar` and `hdr`
