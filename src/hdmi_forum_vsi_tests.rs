@@ -63,7 +63,7 @@ fn truncated_length_is_error() {
 #[test]
 fn unknown_frl_rate_warns_and_decodes() {
     let mut packet = full_frame().into_packets().value.next().unwrap();
-    // frl_rate occupies PB4 bits [6:4]; set to 0x07 (7) which is out of spec
+    // frl_rate occupies PB4 bits [6:4]; set to 0x07 (7) which is out of range
     packet[7] = (packet[7] & 0x8F) | (0x07 << 4);
     let sum: u8 = packet.iter().fold(0u8, |a, &b| a.wrapping_add(b));
     packet[3] = packet[3].wrapping_sub(sum);
@@ -106,7 +106,7 @@ fn reserved_bits_pb8_warning() {
 #[test]
 fn unknown_dsc_max_frl_rate_warns() {
     let mut packet = full_frame().into_packets().value.next().unwrap();
-    // dsc_max_frl_rate occupies PB7 bits [2:0]; set to 7 (out of spec)
+    // dsc_max_frl_rate occupies PB7 bits [2:0]; set to 7 (out of range)
     packet[10] = (packet[10] & 0xF8) | 0x07;
     let sum: u8 = packet.iter().fold(0u8, |a, &b| a.wrapping_add(b));
     packet[3] = packet[3].wrapping_sub(sum);
@@ -123,7 +123,7 @@ fn unknown_dsc_max_frl_rate_warns() {
 #[test]
 fn unknown_dsc_max_slices_warns() {
     let mut packet = full_frame().into_packets().value.next().unwrap();
-    // dsc_max_slices occupies PB8 bits [3:0]; set to 0x0F (out of spec)
+    // dsc_max_slices occupies PB8 bits [3:0]; set to 0x0F (out of range)
     packet[11] = (packet[11] & 0xF0) | 0x0F;
     let sum: u8 = packet.iter().fold(0u8, |a, &b| a.wrapping_add(b));
     packet[3] = packet[3].wrapping_sub(sum);

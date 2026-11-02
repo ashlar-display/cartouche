@@ -164,7 +164,7 @@ impl AudioInfoFrame {
     /// - [`AudioWarning::ChecksumMismatch`] — the packet checksum did not verify.
     /// - [`AudioWarning::ReservedFieldNonZero`] — a reserved bit was set.
     /// - [`AudioWarning::UnknownEnumValue`] — a field contained a value not
-    ///   defined in the spec.
+    ///   defined by CTA-861.
     pub fn decode(packet: &[u8; 31]) -> Result<Decoded<AudioInfoFrame, AudioWarning>, DecodeError> {
         let length = packet[2];
         if length > 27 {

@@ -206,7 +206,7 @@ impl SlHdrMetadata {
     /// `GamutMappingEnabledFlag` is not defined within the SL-HDR payload
     /// itself — it comes from an outer HEVC context unavailable in a standalone
     /// HDMI payload. The gamut-mapping block is therefore always skipped.
-    /// `gamut_mapping_params()` is likewise undefined in the spec excerpt and
+    /// `gamut_mapping_params()` is likewise not defined in the payload syntax this parser follows and
     /// is not parsed.
     ///
     /// # Errors

@@ -16,8 +16,9 @@ exclusion.
 
 `cartouche` is a pure encoding/decoding library. It has no I/O. It does not know how
 InfoFrames are transmitted or received; that is the integration layer's concern. It does
-not know whether a constructed InfoFrame is consistent with the negotiated configuration;
-that is `cartouche-validate`'s concern.
+not know whether a constructed InfoFrame is consistent with the negotiated configuration,
+nor how a configuration becomes InfoFrame fields; both belong to a planned crate that builds
+InfoFrames from a configuration and validates frames against it with the same rules.
 
 ---
 
@@ -31,16 +32,21 @@ cartouche covers:
 - decoding every type from wire packet bytes,
 - a unified `IntoPackets` encoding interface that works for both single-packet and
   multi-packet (Dynamic HDR) frame types,
-- structured decode warnings (checksum mismatch, reserved fields, out-of-spec values)
+- structured decode warnings (checksum mismatch, reserved fields, out-of-range values)
   without discarding the decoded frame,
 - checksum computation on encode and verification on decode,
 - an `InfoFrame` top-level enum covering all known types and an `Unknown` catch-all.
 
+Planned (see [`roadmap.md`](roadmap.md)): the scope widens from InfoFrames to the data
+island packets that describe or control the stream, and `Unknown` keeps every byte.
+
 The following are out of scope:
 
-- **Validation against a negotiated configuration** — a separate `cartouche-validate`
-  crate checks consistency between an InfoFrame and a `NegotiatedConfig`. This requires
-  a `concordance` dependency that does not belong in a pure encoding library.
+- **Building InfoFrames from a configuration, and validating them against it** — a planned
+  separate crate, depending on cartouche and display-types (where the resolved
+  configuration lives) and not on concordance. A configuration type, which will grow and
+  change, does not belong in a pure codec that receiver-side code and capture decoders use
+  without any configuration.
 - **Transmission and reception** — cartouche produces and consumes bytes. The integration
   layer is responsible for writing those bytes into data island periods and reading them
   back.
@@ -84,7 +90,7 @@ warning, not an error.
 
 ### Dynamic HDR InfoFrames
 
-Dynamic HDR (HDMI 2.1 §10.2.8) breaks the 31-byte model. The metadata payload — which
+Dynamic HDR (HDMI 2.1) breaks the 31-byte model. The metadata payload — which
 may be in formats including HDR10+ (ETSI TS 103 433) and SL-HDR — can reach several
 hundred bytes and is transmitted across a sequence of 29-byte-payload packets. Each
 packet in the sequence carries a subset of the metadata; the receiver reassembles them in
@@ -118,7 +124,7 @@ pub trait IntoPackets {
 ```
 
 `into_packets` mirrors the decode path: it returns `Decoded<Iter, Warning>` so that
-encode-time anomalies (field values outside the spec range) are surfaced as warnings
+encode-time anomalies (field values outside the defined range) are surfaced as warnings
 rather than silently discarded. The transmission loop:
 
 ```rust
@@ -263,10 +269,10 @@ A packet whose type code does not correspond to a known InfoFrame type decodes t
 `InfoFrame::Unknown`. The type code, version, and raw payload bytes are preserved. The
 checksum is still verified and a warning attached if it fails.
 
-### Out-of-spec field values
+### Out-of-range field values
 
 Fields that contain values outside the specified range (a reserved colorimetry code,
-an undefined EOTF value, a VIC not listed in the spec) decode to their typed
+an undefined EOTF value, a VIC not listed in CTA-861) decode to their typed
 representation where possible and attach a warning. Where no typed representation exists
 for the value (e.g. a reserved enum discriminant), an `UnknownEnumValue` warning variant
 carries the raw byte. The frame is still returned.
@@ -293,7 +299,7 @@ All per-frame warning enums share a common set of variants:
 - `ChecksumMismatch { expected: u8, found: u8 }` — packet checksum does not verify.
 - `ReservedFieldNonZero { byte: u8, bit: u8 }` — a reserved field is set.
 - `UnknownEnumValue { field: &'static str, raw: u8 }` — a field contains a value not
-  defined in the spec at the time cartouche was written.
+  defined by the standard at the time cartouche was written.
 
 The top-level `decode` function, which dispatches on the type code, uses a unified
 `Warning` enum that wraps the per-frame types:
@@ -352,7 +358,7 @@ is a safeguard, not an expected boundary.
 
 Unlike piaf's alloc build, which uses a type-erased `Arc<dyn Error + Send + Sync>` to
 keep the warning channel open for extension handlers, cartouche uses `Vec<W>` directly.
-The warning set is closed and spec-defined; there are no extension handlers, so
+The warning set is closed and fixed by the standards; there are no extension handlers, so
 type-erasure adds complexity without benefit.
 
 ---
@@ -366,7 +372,7 @@ the color space, colorimetry, quantization range, aspect ratio, active format, V
 pixel repetition count. A correctly configured AVI InfoFrame is required for the sink to
 display the signal correctly.
 
-The AVI InfoFrame is defined in CEA-861. The HDMI 2.1 spec extends it with the Additional
+The AVI InfoFrame is defined in CEA-861. HDMI 2.1 extends it with the Additional
 Colorimetry Extension (ACE) field for wide-color-gamut formats (DCI-P3, BT.2100, and
 others) that the original colorimetry field cannot express.
 
@@ -485,7 +491,7 @@ encoding or decoding behaviour.
   bytes appear only in `Unknown` variants, where they are preserved exactly because the
   type is not understood.
 - **Warnings without data loss.** Anomalous input (bad checksum, reserved field,
-  out-of-spec value) produces a warning, not an error. On decode the warning is attached
+  out-of-range value) produces a warning, not an error. On decode the warning is attached
   to the returned frame; on encode it is attached to the returned `Decoded`. The caller
   receives the data and the warning; nothing is silently discarded. Truncation is the
   only hard error.

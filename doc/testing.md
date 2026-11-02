@@ -25,7 +25,7 @@ produce:
 
 - `ChecksumMismatch`: corrupt byte 3 of an otherwise valid packet.
 - `ReservedFieldNonZero`: set a reserved bit in the payload.
-- `UnknownEnumValue`: set a field to a value not present in the spec-defined enum.
+- `UnknownEnumValue`: set a field to a value not present in the defined enum.
 
 These tests verify that the frame is still returned (not errored) and that exactly the
 expected warning is attached.
@@ -93,7 +93,7 @@ corpus file changed — one PR per deep run covering all five targets.
 
 ## Test philosophy
 
-cartouche should be strict about the wire format and permissive about out-of-spec field
+cartouche should be strict about the wire format and permissive about out-of-range field
 values.
 
 The test suite reflects that balance:
