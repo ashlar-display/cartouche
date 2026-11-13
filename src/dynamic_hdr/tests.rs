@@ -1,10 +1,12 @@
 use super::*;
+#[cfg(any(feature = "alloc", feature = "std"))]
 use crate::dynamic_hdr::hdr10plus::{
     ActualPeakLuminance, BezierAnchors, DistributionMaxrgb, Hdr10PlusWindow, Hdr10PlusWindows,
     KneePoint,
 };
 #[cfg(any(feature = "alloc", feature = "std"))]
 use crate::dynamic_hdr::slhdr::SlHdrExtension;
+#[cfg(any(feature = "alloc", feature = "std"))]
 use crate::dynamic_hdr::slhdr::{
     SlHdrBody, SlHdrMdcvInfo, SlHdrMetadata, SlHdrMode0, SlHdrMode1, SlHdrPayload,
     SlHdrPictureInfo, SlHdrTable15, SlHdrTable127,
@@ -83,6 +85,10 @@ fn bit_writer_msb_first_ordering() {
 }
 
 #[test]
+#[expect(
+    clippy::unusual_byte_groupings,
+    reason = "the groups mark the bit fields written"
+)]
 fn bit_writer_spans_byte_boundary() {
     let mut w = BitWriter::new();
     w.write_u8(0b10111, 5); // top 5 bits of byte 0
@@ -1555,8 +1561,10 @@ mod serde_tests {
 
     #[test]
     fn slhdr_table127_round_trip() {
-        let mut table = SlHdrTable127::default();
-        table.count = 3;
+        let mut table = SlHdrTable127 {
+            count: 3,
+            ..SlHdrTable127::default()
+        };
         table.x[0] = 100;
         table.x[1] = 200;
         table.x[2] = 300;

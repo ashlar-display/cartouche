@@ -14,6 +14,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   so the example panicked with `MalformedPayload`. It now uses an identifier cartouche
   does not type. CI only built the example, so the panic went unnoticed.
 
+### Internal
+
+- **The tests build without `alloc`** and pass `clippy --all-targets`: the tests and
+  imports that need `alloc` are gated on it, the audio checksum test searches the warnings
+  without collecting them, and the `roundtrip` example declares `required-features =
+  ["alloc"]`, so `cargo test --no-default-features` runs the 98 library tests that need no
+  allocator. A test that writes bit fields keeps its grouped binary literal under
+  `#[expect]` with the reason, and a table test uses struct update syntax.
+
 ## [0.3.1] - 2026-11-02
 
 ### Changed
