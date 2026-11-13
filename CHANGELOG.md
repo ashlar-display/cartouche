@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **The `roundtrip` example runs again**: its Dynamic HDR part decoded format identifier
+  0x04 and expected an `Unknown` frame, but since 0.2.0 that identifier decodes as HDR10+,
+  so the example panicked with `MalformedPayload`. It now uses an identifier cartouche
+  does not type. CI only built the example, so the panic went unnoticed.
+
 ## [0.3.1] - 2026-11-02
 
 ### Changed

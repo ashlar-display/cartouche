@@ -143,8 +143,9 @@ fn hdmi_forum_vsi_round_trip() {
 
 fn dynamic_hdr_fragment_decode() {
     // Build a single-packet Dynamic HDR sequence and decode both the fragment
-    // and the assembled frame.  Full round-trip encoding is deferred until a
-    // concrete format variant (HDR10+, SL-HDR) is implemented.
+    // and the assembled frame. The format identifier is one cartouche does not
+    // type (HDR10+ and SL-HDR are), so the frame decodes as `Unknown` with its
+    // payload kept.
     let mut packet = [0u8; 31];
     packet[0] = 0x20; // Dynamic HDR type code
     packet[1] = 0x01; // version
@@ -152,7 +153,7 @@ fn dynamic_hdr_fragment_decode() {
     packet[4] = 0; // seq_num
     packet[5] = 10; // total_bytes low
     packet[6] = 0; // total_bytes high
-    packet[7] = 0x04; // format_id (HDR10+)
+    packet[7] = 0x7E; // format_id: not one cartouche types
     for (i, b) in packet[8..18].iter_mut().enumerate() {
         *b = i as u8;
     }
@@ -162,14 +163,14 @@ fn dynamic_hdr_fragment_decode() {
     let frag = DynamicHdrFragment::decode(&packet).unwrap();
     assert_eq!(frag.value.seq_num, 0);
     assert_eq!(frag.value.total_bytes, 10);
-    assert_eq!(frag.value.format_id, 0x04);
+    assert_eq!(frag.value.format_id, 0x7E);
     assert_eq!(frag.value.chunk_len, 10);
 
     let frame = DynamicHdrInfoFrame::decode_sequence(&[packet]).unwrap();
     assert_eq!(
         frame.value,
         DynamicHdrInfoFrame::Unknown {
-            format_id: 0x04,
+            format_id: 0x7E,
             payload: (0u8..10).collect(),
         }
     );
