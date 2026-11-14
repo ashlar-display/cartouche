@@ -7,6 +7,106 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **docs.rs marks the items that need a feature** (`alloc`, `std`, `serde`) with the
+  `doc_cfg` badge, enabled only in docs.rs builds.
+
+### Changed
+
+- **The README's Ashlar block links the stack's crate list** instead of naming every crate,
+  so it no longer goes stale on crates.io when a crate is added.
+
+### Fixed
+
+- **The `roundtrip` example runs again**: its Dynamic HDR part decoded format identifier
+  0x04 and expected an `Unknown` frame, but since 0.2.0 that identifier decodes as HDR10+,
+  so the example panicked with `MalformedPayload`. It now uses an identifier cartouche
+  does not type. CI only built the example, so the panic went unnoticed.
+- **The README's examples compile against the current API.** The encode/decode example
+  took `decoded.value` before reading `decoded`'s warnings, so it did not compile; the
+  `decode` dispatch example did not import `InfoFramePacket` and had no `_` arm, which a
+  `#[non_exhaustive]` enum needs.
+
+### Internal
+
+- **The tests build without `alloc`** and pass `clippy --all-targets`: the tests and
+  imports that need `alloc` are gated on it, the audio checksum test searches the warnings
+  without collecting them, and the `roundtrip` example declares `required-features =
+  ["alloc"]`, so `cargo test --no-default-features` runs the 98 library tests that need no
+  allocator. A test that writes bit fields keeps its grouped binary literal under
+  `#[expect]` with the reason, and a table test uses struct update syntax.
+- **A test that an oversized Dynamic HDR sequence stays within the payload buffer**: 2300
+  bytes of chunks decode without panicking, and the kept payload is within the 2200-byte
+  buffer.
+- **The coverage baseline is 99.01%, measured with Rust 1.100**: Rust 1.100 counts the
+  same code's lines differently from 1.99 (1517 lines instead of 1550, from a clean
+  `target/`), which measures 98.95% where 1.99 measured 99.16%. The lines left uncovered
+  are unreachable match arms, a fallback for future `ColorFormat` variants, and two paths
+  whose behaviour is to be redesigned rather than pinned by tests.
+- **The README's Rust examples run as doctests** (`ReadmeDoctests` in `lib.rs`, compiled
+  only for `cargo test`): the encode/decode example round-trips its frame and asserts the
+  result, the dispatch example decodes a packet, and the transmission loop compiles inside
+  a hidden function. That is how the errors above were found.
+- **The published `.crate` holds only what the crate needs**: `include` in `Cargo.toml`
+  limits it to the sources, `doc/`, the README, changelog and license; it also shipped the
+  CI workflows, Dependabot configuration, coverage baseline, `.gitignore`,
+  `CONTRIBUTING.md` and the example.
+- **The documentation is built as docs.rs builds it, weekly**: `docs.yml` runs
+  `cargo doc --all-features` with nightly and `--cfg docsrs` (and `-D warnings`), so a
+  nightly change to the `doc_cfg` feature badges shows up before it breaks a docs.rs build.
+- **CI runs with a read-only token by default**: `ci.yml` sets `permissions: contents: read`;
+  the coverage job keeps the write permissions it needs to open its ratchet PR. The test job
+  ran with the repository's default token permissions.
+- **CI's test job does not keep the checkout's git credentials** (`persist-credentials:
+  false`); it never pushes. The coverage job keeps them to push its ratchet branch.
+- **CI fails on a `[patch]` section in `Cargo.toml`**, on `main` and in the publish
+  workflow's `verify` job: `cargo package` drops it, so a release built with one would not
+  build from crates.io.
+- **Clippy lints the tests and the example too, in every feature set**: `--all-targets`,
+  once each with the default features, none, `alloc` only and `serde`, in CI and in the
+  publish workflow's `verify` job; it linted only the library with the default features.
+- **rustdoc runs with every feature and `-D warnings`**, as docs.rs builds, in CI and in
+  the publish workflow's `verify` job: `-D missing_docs` alone let broken intra-doc links
+  through, and the `serde` items were not checked.
+- **The tests run in every feature set**, also with `alloc` only and with no default
+  features, and **the `roundtrip` example runs**, in CI and in the publish workflow's
+  `verify` job; those builds and the example were only compiled, which is how the
+  example's panic went unnoticed.
+- **The `no_std` builds target a bare-metal target** (`thumbv7em-none-eabi`), in CI and in
+  the publish workflow's `verify` job; on the host, `std` was still there for a dependency
+  that pulls it in, so the builds did not show that the crate needs none.
+- **The MSRV is checked**: an `MSRV` job in CI and in the publish workflow (which waits for
+  it) runs the tests in every feature set and the bare-metal builds on the `rust-version`
+  from `Cargo.toml` (1.85) with `cargo msrv verify`; the crate declared it, and nothing
+  checked it.
+- **The coverage job's cache is keyed on the Rust version** as well as `Cargo.lock`, so a
+  `target/` built by an older Rust is not restored: `cargo llvm-cov clean --workspace`
+  leaves its instrumented binaries behind, and the report would count their lines as
+  uncovered (it did so in other Ashlar crates after the update to Rust 1.100).
+- **The fuzz workflow runs with a read-only token by default**, and its fuzz job without
+  the checkout's git credentials; the corpus job keeps both, to push its PR.
+  `fuzz/.gitignore` also covers the fuzzer's coverage output.
+- **`doc/setup.md` lists the checks CI runs**: clippy and the tests in every feature set,
+  rustdoc with every feature, the example, the bare-metal `no_std` builds and the MSRV
+  check; it says which feature sets coverage measures, and its tolerance in percentage
+  points.
+- **`doc/testing.md` describes the builds** CI runs the tests in, the example run and the
+  README doctests.
+- **`CONTRIBUTING.md` matches the CI checks** (clippy over all targets in every feature set,
+  rustdoc with `-D warnings`, the example, the bare-metal builds, the MSRV, a tolerance of
+  0.1 percentage points), states the provenance rule for claims about HDMI behaviour, and
+  has a publishing section.
+- **The README has Out of scope and License sections**, and its documentation list links
+  `CONTRIBUTING.md`.
+- **HDR10+ decoding iterates over the windows and anchors** instead of indexing them, as
+  Rust 1.100's clippy requires (`needless_range_loop`); the bounds checks before the loops
+  are unchanged.
+- **The docs say how coverage is measured**: `doc/testing.md` has a coverage section, and
+  `doc/setup.md` says to measure the baseline with the Rust version CI uses, since versions
+  count lines differently. The README's examples sit under a Usage heading, Documentation
+  comes before Verifying releases, and the dispatch example asserts it takes the AVI arm.
+
 ## [0.3.1] - 2026-11-02
 
 ### Changed

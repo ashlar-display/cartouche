@@ -29,10 +29,9 @@ fn checksum_mismatch_warning() {
     let mut packet = default_frame().into_packets().value.next().unwrap();
     packet[3] = packet[3].wrapping_add(1); // corrupt the checksum byte
     let decoded = AudioInfoFrame::decode(&packet).unwrap();
-    let warnings: alloc::vec::Vec<_> = decoded.iter_warnings().collect();
     assert!(
-        warnings
-            .iter()
+        decoded
+            .iter_warnings()
             .any(|w| matches!(w, AudioWarning::ChecksumMismatch { .. }))
     );
     // Frame is still returned intact

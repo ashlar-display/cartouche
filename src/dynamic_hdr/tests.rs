@@ -1,10 +1,12 @@
 use super::*;
+#[cfg(any(feature = "alloc", feature = "std"))]
 use crate::dynamic_hdr::hdr10plus::{
     ActualPeakLuminance, BezierAnchors, DistributionMaxrgb, Hdr10PlusWindow, Hdr10PlusWindows,
     KneePoint,
 };
 #[cfg(any(feature = "alloc", feature = "std"))]
 use crate::dynamic_hdr::slhdr::SlHdrExtension;
+#[cfg(any(feature = "alloc", feature = "std"))]
 use crate::dynamic_hdr::slhdr::{
     SlHdrBody, SlHdrMdcvInfo, SlHdrMetadata, SlHdrMode0, SlHdrMode1, SlHdrPayload,
     SlHdrPictureInfo, SlHdrTable15, SlHdrTable127,
@@ -83,6 +85,10 @@ fn bit_writer_msb_first_ordering() {
 }
 
 #[test]
+#[expect(
+    clippy::unusual_byte_groupings,
+    reason = "the groups mark the bit fields written"
+)]
 fn bit_writer_spans_byte_boundary() {
     let mut w = BitWriter::new();
     w.write_u8(0b10111, 5); // top 5 bits of byte 0
@@ -1555,8 +1561,10 @@ mod serde_tests {
 
     #[test]
     fn slhdr_table127_round_trip() {
-        let mut table = SlHdrTable127::default();
-        table.count = 3;
+        let mut table = SlHdrTable127 {
+            count: 3,
+            ..SlHdrTable127::default()
+        };
         table.x[0] = 100;
         table.x[1] = 200;
         table.x[2] = 300;
@@ -1695,5 +1703,26 @@ mod serde_tests {
         let json = serde_json::to_string(&frag).unwrap();
         let back: DynamicHdrFragment = serde_json::from_str(&json).unwrap();
         assert_eq!(frag, back);
+    }
+}
+
+/// A sequence whose chunks add up to more than the payload buffer holds decodes without
+/// panicking, and the payload it keeps stays within the buffer.
+#[test]
+#[cfg(any(feature = "alloc", feature = "std"))]
+fn oversized_sequence_stays_within_the_payload_buffer() {
+    let chunk = [0xAAu8; 23];
+    // 100 full chunks: 2300 bytes, more than MAX_DYNAMIC_HDR_PAYLOAD (2200).
+    let packets: alloc::vec::Vec<[u8; 31]> = (0..100u8)
+        .map(|i| make_packet(i, 2300, 0x7E, &chunk))
+        .collect();
+    let decoded = DynamicHdrInfoFrame::decode_sequence(&packets).unwrap();
+    match decoded.value {
+        DynamicHdrInfoFrame::Unknown { format_id, payload } => {
+            assert_eq!(format_id, 0x7E);
+            assert!(payload.len() <= MAX_DYNAMIC_HDR_PAYLOAD);
+            assert!(payload.len() >= MAX_DYNAMIC_HDR_PAYLOAD - chunk.len());
+        }
+        other => panic!("expected Unknown, got {other:?}"),
     }
 }

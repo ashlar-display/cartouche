@@ -91,6 +91,24 @@ After each deep run, each target uploads its minimised corpus as a workflow arti
 final `update-corpus` job assembles all corpora and opens a `ci/fuzz-corpus` PR if any
 corpus file changed — one PR per deep run covering all five targets.
 
+## Builds
+
+CI runs the tests with the default features, with `serde`, with `alloc` only and with no
+default features, on stable and on the MSRV, and builds the bare and `alloc`-only
+configurations for `thumbv7em-none-eabi`, which has no `std`. The tests that need an
+allocator are gated on `alloc`. The `roundtrip` example (which needs `alloc`) runs in CI,
+and the README's examples run as doctests: the encode/decode example round-trips its frame
+and asserts the result.
+
+## Coverage
+
+CI measures line coverage with `cargo-llvm-cov` over the default and `serde` feature sets
+and keeps it from falling with a ratchet: the run fails when coverage drops more than 0.1
+percentage points below `.coverage-baseline`, and a push that improves it opens a
+`ci/coverage-ratchet` PR. The lines left uncovered are unreachable match arms, a fallback
+for future `ColorFormat` variants, and two paths whose behaviour is to be redesigned. The
+baseline is measured with the Rust version CI uses; see [setup.md](setup.md#coverage).
+
 ## Test philosophy
 
 cartouche should be strict about the wire format and permissive about out-of-range field

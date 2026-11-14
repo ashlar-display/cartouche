@@ -10,15 +10,7 @@
 
 > **Part of [Ashlar](https://ashlar-display.org)** — a display connection stack in Rust,
 > HDMI 2.1 first: from EDID parsing through mode negotiation to FRL link training.
->
-> [display-types](https://github.com/ashlar-display/display-types) ·
-> [piaf](https://github.com/ashlar-display/piaf) ·
-> [concordance](https://github.com/ashlar-display/concordance) ·
-> **cartouche** ·
-> [culvert](https://github.com/ashlar-display/culvert) ·
-> [plumbob](https://github.com/ashlar-display/plumbob) ·
-> [hdmi-hal](https://github.com/ashlar-display/hdmi-hal) ·
-> [hdmi-hal-i2c-dev](https://github.com/ashlar-display/hdmi-hal-i2c-dev)
+> See [all crates](https://ashlar-display.org/crates.html).
 
 Encoding and decoding for HDMI InfoFrames.
 
@@ -32,7 +24,12 @@ HDMI signal. The AVI InfoFrame signals color space and colorimetry; the HDR Info
 carry mastering metadata and dynamic tone mapping parameters; the HDMI Forum VSI signals
 ALLM, VRR, and DSC state.
 
+## Usage
+
 ```rust
+# fn main() -> Result<(), cartouche::error::DecodeError> {
+# fn transmit(_packet: &[u8; 31]) {}
+# let mut last = [0u8; 31];
 use cartouche::avi::{
     AviInfoFrame, BarInfo, Colorimetry, ExtendedColorimetry, ItContentType,
     NonUniformScaling, PictureAspectRatio, RgbQuantization, ScanInfo, YccQuantization,
@@ -68,20 +65,32 @@ for warning in encoded.iter_warnings() {
 }
 for packet in encoded.value {
     transmit(&packet);  // your integration layer
+#   last = packet;
 }
 
 // Decode
+# let packet = last;
 let decoded = AviInfoFrame::decode(&packet)?;
-let frame = decoded.value;
 for warning in decoded.iter_warnings() {
     eprintln!("decode warning: {:?}", warning);
 }
+# assert_eq!(decoded.iter_warnings().count(), 0);
+let frame = decoded.value;
+# assert_eq!(frame.vic, 16);
+# Ok(())
+# }
 ```
 
 The top-level `decode` function dispatches on the type code and returns an `InfoFramePacket`:
 
 ```rust
+# fn main() -> Result<(), cartouche::error::DecodeError> {
+# // An AVI InfoFrame packet with no payload set, checksum included.
+# let mut packet = [0u8; 31];
+# packet[..3].copy_from_slice(&[0x82, 0x02, 0x0D]);
+# packet[3] = 0u8.wrapping_sub(packet.iter().fold(0u8, |a, &b| a.wrapping_add(b)));
 use cartouche::decode;
+use cartouche::frame::InfoFramePacket;
 
 match decode(&packet)?.value {
     InfoFramePacket::Avi(f)          => { /* f: AviInfoFrame */ }
@@ -90,7 +99,11 @@ match decode(&packet)?.value {
     InfoFramePacket::HdmiForumVsi(f) => { /* f: HdmiForumVsi */ }
     InfoFramePacket::DynamicHdrFragment(frag) => { /* accumulate sequence */ }
     InfoFramePacket::Unknown { type_code, .. } => { /* unrecognised type */ }
+    _ => { /* InfoFramePacket is #[non_exhaustive]: types added in later releases */ }
 }
+# assert!(matches!(decode(&packet)?.value, InfoFramePacket::Avi(_)));
+# Ok(())
+# }
 ```
 
 ```mermaid
@@ -126,11 +139,15 @@ designed for both single-packet and multi-packet (Dynamic HDR) frame types from 
 start. For the four traditional types the transmission loop is already uniform:
 
 ```rust
+# use cartouche::encode::IntoPackets;
+# fn transmit(_packet: &[u8; 31]) {}
+# fn send(frame: cartouche::avi::AviInfoFrame) {
 let encoded = frame.into_packets();
 // check encoded.iter_warnings()
 for packet in encoded.value {
     transmit(&packet);
 }
+# }
 ```
 
 Dynamic HDR is fully supported: fragment decode, sequence assembly into typed
@@ -191,6 +208,26 @@ flowchart LR
     cart -->|"[u8; 31] packets"| integ
 ```
 
+## Out of scope
+
+- **Building InfoFrames from a configuration, and validating them against it** — a
+  separate crate's job; cartouche stays a codec that receiver-side code and capture
+  decoders use without any configuration.
+- **Transmission and reception** — cartouche produces and consumes bytes; the integration
+  layer writes them into data island periods and reads them back.
+- **CEC and SCDC** — other crates' protocols.
+
+## Documentation
+
+Extended documentation lives under [`doc/`](doc/).
+
+- [`doc/architecture.md`](doc/architecture.md) — wire format, encode/decode abstraction, InfoFrame types, and design principles
+- [`doc/setup.md`](doc/setup.md) — build, test, and fuzzing commands
+- [`doc/testing.md`](doc/testing.md) — testing strategy and fuzz targets
+- [`doc/roadmap.md`](doc/roadmap.md) — planned features and future work
+- [`CONTRIBUTING.md`](CONTRIBUTING.md) — how to contribute, and how releases reach the
+  crates that depend on cartouche
+
 ## Verifying releases
 
 Releases from v0.2.0 onwards are built on GitHub Actions and attested with
@@ -228,11 +265,6 @@ curl -A "your-tool (contact)" https://crates.io/api/v1/crates/cartouche/X.Y.Z
 0.1.0 and 0.2.0 were uploaded with an API token (0.1.0 by hand, 0.2.0 from CI); 0.1.0
 carries no provenance and has no GitHub release.
 
-## Documentation
+## License
 
-Extended documentation lives under [`doc/`](doc/).
-
-- [`doc/architecture.md`](doc/architecture.md) — wire format, encode/decode abstraction, InfoFrame types, and design principles
-- [`doc/setup.md`](doc/setup.md) — build, test, and fuzzing commands
-- [`doc/testing.md`](doc/testing.md) — testing strategy and fuzz targets
-- [`doc/roadmap.md`](doc/roadmap.md) — planned features and future work
+Licensed under the [Mozilla Public License 2.0](LICENSE).

@@ -15,6 +15,7 @@
 //! array. No other behaviour changes.
 
 #![no_std]
+#![cfg_attr(docsrs, feature(doc_cfg))]
 #![forbid(unsafe_code)]
 #![deny(missing_docs)]
 
@@ -54,3 +55,8 @@ pub mod frame;
 
 mod decode;
 pub use decode::decode;
+
+// Compiles and runs the README's examples as doctests.
+#[cfg(doctest)]
+#[doc = include_str!("../README.md")]
+struct ReadmeDoctests;
