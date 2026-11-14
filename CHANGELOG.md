@@ -73,6 +73,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   features, and **the `roundtrip` example runs**, in CI and in the publish workflow's
   `verify` job; those builds and the example were only compiled, which is how the
   example's panic went unnoticed.
+- **The `no_std` builds target a bare-metal target** (`thumbv7em-none-eabi`), in CI and in
+  the publish workflow's `verify` job; on the host, `std` was still there for a dependency
+  that pulls it in, so the builds did not show that the crate needs none.
 
 ## [0.3.1] - 2026-11-02
 
