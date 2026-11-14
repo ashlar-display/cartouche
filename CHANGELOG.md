@@ -25,6 +25,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **A test that an oversized Dynamic HDR sequence stays within the payload buffer**: 2300
   bytes of chunks decode without panicking, and the kept payload is within the 2200-byte
   buffer.
+- **The coverage baseline is 99.01%, measured with Rust 1.100**: Rust 1.100 counts the
+  same code's lines differently from 1.99 (1517 lines instead of 1550, from a clean
+  `target/`), which measures 98.95% where 1.99 measured 99.16%. The lines left uncovered
+  are unreachable match arms, a fallback for future `ColorFormat` variants, and two paths
+  whose behaviour is to be redesigned rather than pinned by tests.
 
 ## [0.3.1] - 2026-11-02
 
