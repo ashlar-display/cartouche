@@ -33,6 +33,9 @@ carry mastering metadata and dynamic tone mapping parameters; the HDMI Forum VSI
 ALLM, VRR, and DSC state.
 
 ```rust
+# fn main() -> Result<(), cartouche::error::DecodeError> {
+# fn transmit(_packet: &[u8; 31]) {}
+# let mut last = [0u8; 31];
 use cartouche::avi::{
     AviInfoFrame, BarInfo, Colorimetry, ExtendedColorimetry, ItContentType,
     NonUniformScaling, PictureAspectRatio, RgbQuantization, ScanInfo, YccQuantization,
@@ -68,20 +71,32 @@ for warning in encoded.iter_warnings() {
 }
 for packet in encoded.value {
     transmit(&packet);  // your integration layer
+#   last = packet;
 }
 
 // Decode
+# let packet = last;
 let decoded = AviInfoFrame::decode(&packet)?;
-let frame = decoded.value;
 for warning in decoded.iter_warnings() {
     eprintln!("decode warning: {:?}", warning);
 }
+# assert_eq!(decoded.iter_warnings().count(), 0);
+let frame = decoded.value;
+# assert_eq!(frame.vic, 16);
+# Ok(())
+# }
 ```
 
 The top-level `decode` function dispatches on the type code and returns an `InfoFramePacket`:
 
 ```rust
+# fn main() -> Result<(), cartouche::error::DecodeError> {
+# // An AVI InfoFrame packet with no payload set, checksum included.
+# let mut packet = [0u8; 31];
+# packet[..3].copy_from_slice(&[0x82, 0x02, 0x0D]);
+# packet[3] = 0u8.wrapping_sub(packet.iter().fold(0u8, |a, &b| a.wrapping_add(b)));
 use cartouche::decode;
+use cartouche::frame::InfoFramePacket;
 
 match decode(&packet)?.value {
     InfoFramePacket::Avi(f)          => { /* f: AviInfoFrame */ }
@@ -90,7 +105,10 @@ match decode(&packet)?.value {
     InfoFramePacket::HdmiForumVsi(f) => { /* f: HdmiForumVsi */ }
     InfoFramePacket::DynamicHdrFragment(frag) => { /* accumulate sequence */ }
     InfoFramePacket::Unknown { type_code, .. } => { /* unrecognised type */ }
+    _ => { /* InfoFramePacket is #[non_exhaustive]: types added in later releases */ }
 }
+# Ok(())
+# }
 ```
 
 ```mermaid
@@ -126,11 +144,15 @@ designed for both single-packet and multi-packet (Dynamic HDR) frame types from 
 start. For the four traditional types the transmission loop is already uniform:
 
 ```rust
+# use cartouche::encode::IntoPackets;
+# fn transmit(_packet: &[u8; 31]) {}
+# fn send(frame: cartouche::avi::AviInfoFrame) {
 let encoded = frame.into_packets();
 // check encoded.iter_warnings()
 for packet in encoded.value {
     transmit(&packet);
 }
+# }
 ```
 
 Dynamic HDR is fully supported: fragment decode, sequence assembly into typed

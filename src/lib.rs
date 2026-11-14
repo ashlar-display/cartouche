@@ -54,3 +54,8 @@ pub mod frame;
 
 mod decode;
 pub use decode::decode;
+
+// Compiles and runs the README's examples as doctests.
+#[cfg(doctest)]
+#[doc = include_str!("../README.md")]
+struct ReadmeDoctests;

@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   0x04 and expected an `Unknown` frame, but since 0.2.0 that identifier decodes as HDR10+,
   so the example panicked with `MalformedPayload`. It now uses an identifier cartouche
   does not type. CI only built the example, so the panic went unnoticed.
+- **The README's examples compile against the current API.** The encode/decode example
+  took `decoded.value` before reading `decoded`'s warnings, so it did not compile; the
+  `decode` dispatch example did not import `InfoFramePacket` and had no `_` arm, which a
+  `#[non_exhaustive]` enum needs.
 
 ### Internal
 
@@ -30,6 +34,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `target/`), which measures 98.95% where 1.99 measured 99.16%. The lines left uncovered
   are unreachable match arms, a fallback for future `ColorFormat` variants, and two paths
   whose behaviour is to be redesigned rather than pinned by tests.
+- **The README's Rust examples run as doctests** (`ReadmeDoctests` in `lib.rs`, compiled
+  only for `cargo test`): the encode/decode example round-trips its frame and asserts the
+  result, the dispatch example decodes a packet, and the transmission loop compiles inside
+  a hidden function. That is how the errors above were found.
 
 ## [0.3.1] - 2026-11-02
 
