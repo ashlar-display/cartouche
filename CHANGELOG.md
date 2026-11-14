@@ -63,6 +63,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **CI fails on a `[patch]` section in `Cargo.toml`**, on `main` and in the publish
   workflow's `verify` job: `cargo package` drops it, so a release built with one would not
   build from crates.io.
+- **Clippy lints the tests and the example too, in every feature set**: `--all-targets`,
+  once each with the default features, none, `alloc` only and `serde`, in CI and in the
+  publish workflow's `verify` job; it linted only the library with the default features.
 
 ## [0.3.1] - 2026-11-02
 
