@@ -29,3 +29,10 @@ required-features = ["alloc"]
 
 [dev-dependencies]
 serde_json = "1.0.149"
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ["cfg(docsrs)"] }
