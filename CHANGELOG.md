@@ -87,6 +87,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **The fuzz workflow runs with a read-only token by default**, and its fuzz job without
   the checkout's git credentials; the corpus job keeps both, to push its PR.
   `fuzz/.gitignore` also covers the fuzzer's coverage output.
+- **`doc/setup.md` lists the checks CI runs**: clippy and the tests in every feature set,
+  rustdoc with every feature, the example, the bare-metal `no_std` builds and the MSRV
+  check; it says which feature sets coverage measures, and its tolerance in percentage
+  points.
 
 ## [0.3.1] - 2026-11-02
 

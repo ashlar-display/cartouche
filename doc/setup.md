@@ -10,13 +10,57 @@ cd cartouche
 cargo build
 ```
 
+## Running checks
+
+```sh
+cargo fmt --check
+cargo clippy --all-targets -- -D warnings
+cargo clippy --all-targets --no-default-features -- -D warnings
+cargo clippy --all-targets --no-default-features --features alloc -- -D warnings
+cargo clippy --all-targets --features serde -- -D warnings
+cargo rustdoc --all-features -- -D warnings
+```
+
 ## Running tests
 
 ```sh
-cargo test                                           # std (default)
-cargo test --features serde                          # std + serde
-cargo build --no-default-features --features alloc  # alloc-only build check
-cargo build --no-default-features                   # bare no_std build check
+cargo test                                         # std (default)
+cargo test --features serde                        # std + serde
+cargo test --no-default-features --features alloc  # alloc only
+cargo test --no-default-features                   # bare no_std
+cargo run --example roundtrip                      # encode and decode each InfoFrame type
+```
+
+The example needs `alloc`; without it Cargo skips it. The README's examples run as
+doctests with the others. See [testing.md](testing.md) for what the tests cover.
+
+## `no_std` builds
+
+Without `std` the crate is `no_std`, with or without `alloc`. CI checks both on a bare
+target, which has no `std` for a dependency to pull in:
+
+```sh
+rustup target add thumbv7em-none-eabi
+cargo build --no-default-features --features alloc --target thumbv7em-none-eabi
+cargo build --no-default-features --target thumbv7em-none-eabi
+```
+
+## Checking the MSRV
+
+The MSRV is `rust-version` in `Cargo.toml`. CI checks it with
+[`cargo-msrv`](https://github.com/foresterre/cargo-msrv), which runs the checks on that
+toolchain:
+
+```sh
+cargo install cargo-msrv --version 0.19.6 --locked
+cargo msrv verify -- cargo test --locked
+cargo msrv verify -- cargo test --locked --features serde
+cargo msrv verify -- cargo test --locked --no-default-features --features alloc
+cargo msrv verify -- cargo test --locked --no-default-features
+cargo msrv verify --target thumbv7em-none-eabi \
+  -- cargo build --locked --no-default-features --features alloc --target thumbv7em-none-eabi
+cargo msrv verify --target thumbv7em-none-eabi \
+  -- cargo build --locked --no-default-features --target thumbv7em-none-eabi
 ```
 
 ## Coverage
@@ -26,10 +70,10 @@ tools component:
 
 ```sh
 rustup component add llvm-tools-preview
-cargo install cargo-llvm-cov
+cargo install cargo-llvm-cov --locked
 ```
 
-Measure coverage across all feature sets:
+Measure coverage over the default and `serde` feature sets, as CI does:
 
 ```sh
 cargo llvm-cov clean --workspace
@@ -49,7 +93,9 @@ cargo llvm-cov report --json --summary-only \
   > .coverage-baseline
 ```
 
-Commit `.coverage-baseline` alongside the tests that raised it. CI will open a PR
+CI fails when line coverage drops more than 0.1 percentage points below
+`.coverage-baseline`. Commit `.coverage-baseline` alongside the tests that raised it. CI
+will open a PR
 automatically when coverage improves on a push to `main` or `develop`, but you can also
 update it manually as part of your feature branch.
 
