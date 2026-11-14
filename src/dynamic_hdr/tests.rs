@@ -1705,3 +1705,24 @@ mod serde_tests {
         assert_eq!(frag, back);
     }
 }
+
+/// A sequence whose chunks add up to more than the payload buffer holds decodes without
+/// panicking, and the payload it keeps stays within the buffer.
+#[test]
+#[cfg(any(feature = "alloc", feature = "std"))]
+fn oversized_sequence_stays_within_the_payload_buffer() {
+    let chunk = [0xAAu8; 23];
+    // 100 full chunks: 2300 bytes, more than MAX_DYNAMIC_HDR_PAYLOAD (2200).
+    let packets: alloc::vec::Vec<[u8; 31]> = (0..100u8)
+        .map(|i| make_packet(i, 2300, 0x7E, &chunk))
+        .collect();
+    let decoded = DynamicHdrInfoFrame::decode_sequence(&packets).unwrap();
+    match decoded.value {
+        DynamicHdrInfoFrame::Unknown { format_id, payload } => {
+            assert_eq!(format_id, 0x7E);
+            assert!(payload.len() <= MAX_DYNAMIC_HDR_PAYLOAD);
+            assert!(payload.len() >= MAX_DYNAMIC_HDR_PAYLOAD - chunk.len());
+        }
+        other => panic!("expected Unknown, got {other:?}"),
+    }
+}

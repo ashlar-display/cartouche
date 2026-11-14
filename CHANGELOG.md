@@ -22,6 +22,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   ["alloc"]`, so `cargo test --no-default-features` runs the 98 library tests that need no
   allocator. A test that writes bit fields keeps its grouped binary literal under
   `#[expect]` with the reason, and a table test uses struct update syntax.
+- **A test that an oversized Dynamic HDR sequence stays within the payload buffer**: 2300
+  bytes of chunks decode without panicking, and the kept payload is within the 2200-byte
+  buffer.
 
 ## [0.3.1] - 2026-11-02
 
