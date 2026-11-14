@@ -102,6 +102,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **HDR10+ decoding iterates over the windows and anchors** instead of indexing them, as
   Rust 1.100's clippy requires (`needless_range_loop`); the bounds checks before the loops
   are unchanged.
+- **The docs say how coverage is measured**: `doc/testing.md` has a coverage section, and
+  `doc/setup.md` says to measure the baseline with the Rust version CI uses, since versions
+  count lines differently. The README's examples sit under a Usage heading, Documentation
+  comes before Verifying releases, and the dispatch example asserts it takes the AVI arm.
 
 ## [0.3.1] - 2026-11-02
 

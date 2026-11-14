@@ -24,6 +24,8 @@ HDMI signal. The AVI InfoFrame signals color space and colorimetry; the HDR Info
 carry mastering metadata and dynamic tone mapping parameters; the HDMI Forum VSI signals
 ALLM, VRR, and DSC state.
 
+## Usage
+
 ```rust
 # fn main() -> Result<(), cartouche::error::DecodeError> {
 # fn transmit(_packet: &[u8; 31]) {}
@@ -99,6 +101,7 @@ match decode(&packet)?.value {
     InfoFramePacket::Unknown { type_code, .. } => { /* unrecognised type */ }
     _ => { /* InfoFramePacket is #[non_exhaustive]: types added in later releases */ }
 }
+# assert!(matches!(decode(&packet)?.value, InfoFramePacket::Avi(_)));
 # Ok(())
 # }
 ```
@@ -214,6 +217,17 @@ flowchart LR
   layer writes them into data island periods and reads them back.
 - **CEC and SCDC** — other crates' protocols.
 
+## Documentation
+
+Extended documentation lives under [`doc/`](doc/).
+
+- [`doc/architecture.md`](doc/architecture.md) — wire format, encode/decode abstraction, InfoFrame types, and design principles
+- [`doc/setup.md`](doc/setup.md) — build, test, and fuzzing commands
+- [`doc/testing.md`](doc/testing.md) — testing strategy and fuzz targets
+- [`doc/roadmap.md`](doc/roadmap.md) — planned features and future work
+- [`CONTRIBUTING.md`](CONTRIBUTING.md) — how to contribute, and how releases reach the
+  crates that depend on cartouche
+
 ## Verifying releases
 
 Releases from v0.2.0 onwards are built on GitHub Actions and attested with
@@ -250,17 +264,6 @@ curl -A "your-tool (contact)" https://crates.io/api/v1/crates/cartouche/X.Y.Z
 
 0.1.0 and 0.2.0 were uploaded with an API token (0.1.0 by hand, 0.2.0 from CI); 0.1.0
 carries no provenance and has no GitHub release.
-
-## Documentation
-
-Extended documentation lives under [`doc/`](doc/).
-
-- [`doc/architecture.md`](doc/architecture.md) — wire format, encode/decode abstraction, InfoFrame types, and design principles
-- [`doc/setup.md`](doc/setup.md) — build, test, and fuzzing commands
-- [`doc/testing.md`](doc/testing.md) — testing strategy and fuzz targets
-- [`doc/roadmap.md`](doc/roadmap.md) — planned features and future work
-- [`CONTRIBUTING.md`](CONTRIBUTING.md) — how to contribute, and how releases reach the
-  crates that depend on cartouche
 
 ## License
 

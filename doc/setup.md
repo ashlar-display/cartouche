@@ -82,6 +82,11 @@ cargo llvm-cov --no-report --locked --features serde
 cargo llvm-cov report --summary-only
 ```
 
+Rust versions count lines differently, so the same code can measure differently on two
+versions (cartouche: 99.16% on Rust 1.99, 99.01% on Rust 1.100). Measure the baseline with
+the Rust version CI's `stable` uses, `cargo +<version> llvm-cov …`, or CI can fail on a
+baseline that a different local version produced.
+
 To update `.coverage-baseline` after improving coverage:
 
 ```sh
