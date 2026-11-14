@@ -93,6 +93,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   points.
 - **`doc/testing.md` describes the builds** CI runs the tests in, the example run and the
   README doctests.
+- **`CONTRIBUTING.md` matches the CI checks** (clippy over all targets in every feature set,
+  rustdoc with `-D warnings`, the example, the bare-metal builds, the MSRV, a tolerance of
+  0.1 percentage points), states the provenance rule for claims about HDMI behaviour, and
+  has a publishing section.
 
 ## [0.3.1] - 2026-11-02
 
