@@ -97,6 +97,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   rustdoc with `-D warnings`, the example, the bare-metal builds, the MSRV, a tolerance of
   0.1 percentage points), states the provenance rule for claims about HDMI behaviour, and
   has a publishing section.
+- **The README has Out of scope and License sections**, and its documentation list links
+  `CONTRIBUTING.md`.
 
 ## [0.3.1] - 2026-11-02
 

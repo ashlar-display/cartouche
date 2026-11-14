@@ -205,6 +205,15 @@ flowchart LR
     cart -->|"[u8; 31] packets"| integ
 ```
 
+## Out of scope
+
+- **Building InfoFrames from a configuration, and validating them against it** — a
+  separate crate's job; cartouche stays a codec that receiver-side code and capture
+  decoders use without any configuration.
+- **Transmission and reception** — cartouche produces and consumes bytes; the integration
+  layer writes them into data island periods and reads them back.
+- **CEC and SCDC** — other crates' protocols.
+
 ## Verifying releases
 
 Releases from v0.2.0 onwards are built on GitHub Actions and attested with
@@ -250,3 +259,9 @@ Extended documentation lives under [`doc/`](doc/).
 - [`doc/setup.md`](doc/setup.md) — build, test, and fuzzing commands
 - [`doc/testing.md`](doc/testing.md) — testing strategy and fuzz targets
 - [`doc/roadmap.md`](doc/roadmap.md) — planned features and future work
+- [`CONTRIBUTING.md`](CONTRIBUTING.md) — how to contribute, and how releases reach the
+  crates that depend on cartouche
+
+## License
+
+Licensed under the [Mozilla Public License 2.0](LICENSE).
