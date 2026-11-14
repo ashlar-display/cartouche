@@ -91,6 +91,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   rustdoc with every feature, the example, the bare-metal `no_std` builds and the MSRV
   check; it says which feature sets coverage measures, and its tolerance in percentage
   points.
+- **`doc/testing.md` describes the builds** CI runs the tests in, the example run and the
+  README doctests.
 
 ## [0.3.1] - 2026-11-02
 

@@ -91,6 +91,15 @@ After each deep run, each target uploads its minimised corpus as a workflow arti
 final `update-corpus` job assembles all corpora and opens a `ci/fuzz-corpus` PR if any
 corpus file changed — one PR per deep run covering all five targets.
 
+## Builds
+
+CI runs the tests with the default features, with `serde`, with `alloc` only and with no
+default features, on stable and on the MSRV, and builds the bare and `alloc`-only
+configurations for `thumbv7em-none-eabi`, which has no `std`. The tests that need an
+allocator are gated on `alloc`. The `roundtrip` example (which needs `alloc`) runs in CI,
+and the README's examples run as doctests: the encode/decode example round-trips its frame
+and asserts the result.
+
 ## Test philosophy
 
 cartouche should be strict about the wire format and permissive about out-of-range field
