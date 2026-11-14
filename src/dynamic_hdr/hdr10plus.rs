@@ -208,8 +208,8 @@ impl Hdr10PlusMetadata {
             count: num_windows,
             ..Default::default()
         };
-        for i in 0..num_windows as usize {
-            windows.windows[i] = Self::decode_window(&mut r)?;
+        for window in windows.windows.iter_mut().take(num_windows as usize) {
+            *window = Self::decode_window(&mut r)?;
         }
 
         let mastering_display_actual_peak_luminance_flag = r.read_bool()?;
@@ -221,20 +221,25 @@ impl Hdr10PlusMetadata {
             };
 
         // Tone-mapping data is read in a second pass over the windows.
-        for i in 0..num_windows as usize {
+        for window in windows.windows.iter_mut().take(num_windows as usize) {
             let tone_mapping_flag = r.read_bool()?;
-            windows.windows[i].tone_mapping_flag = tone_mapping_flag;
+            window.tone_mapping_flag = tone_mapping_flag;
             if tone_mapping_flag {
                 let x = r.read_u16(12)?;
                 let y = r.read_u16(12)?;
-                windows.windows[i].knee_point = Some(KneePoint { x, y });
+                window.knee_point = Some(KneePoint { x, y });
                 let num_anchors = r.read_u8(4)?;
                 if num_anchors > 9 {
                     return Err(DecodeError::MalformedPayload);
                 }
-                windows.windows[i].bezier_curve_anchors.count = num_anchors;
-                for j in 0..num_anchors as usize {
-                    windows.windows[i].bezier_curve_anchors.anchors[j] = r.read_u16(10)?;
+                window.bezier_curve_anchors.count = num_anchors;
+                for anchor in window
+                    .bezier_curve_anchors
+                    .anchors
+                    .iter_mut()
+                    .take(num_anchors as usize)
+                {
+                    *anchor = r.read_u16(10)?;
                 }
             }
         }

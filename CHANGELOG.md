@@ -99,6 +99,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   has a publishing section.
 - **The README has Out of scope and License sections**, and its documentation list links
   `CONTRIBUTING.md`.
+- **HDR10+ decoding iterates over the windows and anchors** instead of indexing them, as
+  Rust 1.100's clippy requires (`needless_range_loop`); the bounds checks before the loops
+  are unchanged.
 
 ## [0.3.1] - 2026-11-02
 
