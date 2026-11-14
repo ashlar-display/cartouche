@@ -10,6 +10,7 @@ repository = "https://github.com/ashlar-display/cartouche"
 homepage = "https://ashlar-display.org"
 keywords = ["ashlar", "hdmi", "no-std", "infoframe", "hdr"]
 categories = ["hardware-support", "embedded", "encoding", "no-std", "no-std::no-alloc"]
+include = ["src/**", "doc/**", "README.md", "CHANGELOG.md", "LICENSE"]
 
 [features]
 default = ["std"]
